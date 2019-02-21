@@ -179,7 +179,7 @@ $(function() {
         const timeDiff = typingTimer - lastTypingTime;
         if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
           socket.send(
-            JSON.stringify({ evenType: 'stop typing', username: selfUsername })
+            JSON.stringify({ eventType: 'stop typing', username: selfUsername })
           );
           typing = false;
         }
@@ -218,7 +218,7 @@ $(function() {
       if (selfUsername) {
         sendMessage();
         socket.send(
-          JSON.stringify({ evenType: 'stop typing', username: selfUsername })
+          JSON.stringify({ eventType: 'stop typing', username: selfUsername })
         );
         typing = false;
       } else {
