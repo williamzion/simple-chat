@@ -29,7 +29,7 @@ $(function() {
   let username;
   const connected = false;
   const typing = false;
-  const lastTypingTime;
+  let lastTypingTime;
   const $currentInput = $usernameInput.focus();
 
   const socket = new WebSocket('ws://' + document.location.host + '/ws');
