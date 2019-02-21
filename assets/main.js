@@ -18,68 +18,70 @@ $(function() {
 
   // Initialize variables
   const $window = $(window);
-  const $usernameInput = $('.usernameInput'); // Input for username
-  const $messages = $('.messages'); // Messages area
-  const $inputMessage = $('.inputMessage'); // Input message input box
+  let $usernameInput = $('.usernameInput'); // Input for username
+  let $messages = $('.messages'); // Messages area
+  let $inputMessage = $('.inputMessage'); // Input message input box
 
   const $loginPage = $('.login.page'); // The login page
   const $chatPage = $('.chat.page'); // The chatroom page
 
   // Prompt for setting a username
-  let username;
-  const connected = false;
-  const typing = false;
+  let selfUsername;
+  let connected = false;
+  let typing = false;
   let lastTypingTime;
-  const $currentInput = $usernameInput.focus();
+  let $currentInput = $usernameInput.focus();
 
   const socket = new WebSocket('ws://' + document.location.host + '/ws');
 
-  const addParticipantsMessage = (data) => {
-    const message = '';
-    if (data.numUsers === 1) {
+  const addParticipantsMessage = (numUsers) => {
+    let message = '';
+    if (numUsers === 1) {
       message += "there's 1 participant";
     } else {
-      message += 'there are ' + data.numUsers + ' participants';
+      message += 'there are ' + numUsers + ' participants';
     }
     log(message);
   };
 
   // Sets the client's username
   const setUsername = () => {
-    username = cleanInput($usernameInput.val().trim());
+    selfUsername = cleanInput($usernameInput.val().trim());
 
     // If the username is valid
-    if (username) {
+    if (selfUsername) {
       $loginPage.fadeOut();
       $chatPage.show();
       $loginPage.off('click');
       $currentInput = $inputMessage.focus();
 
       // Tell the server your username
-      socket.emit('add user', username);
+      socket.send(
+        JSON.stringify({ eventType: 'add user', username: selfUsername })
+      );
     }
   };
 
   // Sends a chat message
   const sendMessage = () => {
-    const message = $inputMessage.val();
+    let message = $inputMessage.val();
     // Prevent markup from being injected into the message
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
     if (message && connected) {
       $inputMessage.val('');
       addChatMessage({
-        username: username,
+        username: selfUsername,
         message: message,
       });
       // tell server to execute 'new message' and send along one parameter
-      socket.emit('new message', message);
+      socket.send(JSON.stringify({ eventType: 'new message', message }));
     }
   };
 
   // Log a message
   const log = (message, options) => {
-    const $el = $('<li>')
+    let $el = $('<li>')
       .addClass('log')
       .text(message);
     addMessageElement($el, options);
@@ -88,20 +90,20 @@ $(function() {
   // Adds the visual chat message to the message list
   const addChatMessage = (data, options) => {
     // Don't fade the message in if there is an 'X was typing'
-    const $typingMessages = getTypingMessages(data);
+    let $typingMessages = getTypingMessages(data);
     options = options || {};
     if ($typingMessages.length !== 0) {
       options.fade = false;
       $typingMessages.remove();
     }
 
-    const $usernameDiv = $('<span class="username"/>')
+    let $usernameDiv = $('<span class="username"/>')
       .text(data.username)
       .css('color', getUsernameColor(data.username));
-    const $messageBodyDiv = $('<span class="messageBody">').text(data.message);
+    let $messageBodyDiv = $('<span class="messageBody">').text(data.message);
 
-    const typingClass = data.typing ? 'typing' : '';
-    const $messageDiv = $('<li class="message"/>')
+    let typingClass = data.typing ? 'typing' : '';
+    let $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .append($usernameDiv, $messageBodyDiv);
@@ -129,7 +131,7 @@ $(function() {
   // options.prepend - If the element should prepend
   //   all other messages (default = false)
   const addMessageElement = (el, options) => {
-    const $el = $(el);
+    let $el = $(el);
 
     // Setup default options
     if (!options) {
@@ -166,7 +168,9 @@ $(function() {
     if (connected) {
       if (!typing) {
         typing = true;
-        socket.emit('typing');
+        socket.send(
+          JSON.stringify({ eventType: 'typing', username: selfUsername })
+        );
       }
       lastTypingTime = new Date().getTime();
 
@@ -174,7 +178,9 @@ $(function() {
         const typingTimer = new Date().getTime();
         const timeDiff = typingTimer - lastTypingTime;
         if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
-          socket.emit('stop typing');
+          socket.send(
+            JSON.stringify({ evenType: 'stop typing', username: selfUsername })
+          );
           typing = false;
         }
       }, TYPING_TIMER_LENGTH);
@@ -191,8 +197,8 @@ $(function() {
   // Gets the color of a username through our hash function
   const getUsernameColor = (username) => {
     // Compute hash code
-    const hash = 7;
-    for (const i = 0; i < username.length; i++) {
+    let hash = 7;
+    for (let i = 0; i < username.length; i++) {
       hash = username.charCodeAt(i) + (hash << 5) - hash;
     }
     // Calculate color
@@ -209,9 +215,11 @@ $(function() {
     }
     // When the client hits ENTER on their keyboard
     if (event.which === 13) {
-      if (username) {
+      if (selfUsername) {
         sendMessage();
-        socket.emit('stop typing');
+        socket.send(
+          JSON.stringify({ evenType: 'stop typing', username: selfUsername })
+        );
         typing = false;
       } else {
         setUsername();
@@ -237,57 +245,56 @@ $(function() {
 
   // Socket events
 
-  // Whenever the server emits 'login', log the login message
-  socket.on('login', (data) => {
-    connected = true;
-    // Display the welcome message
-    const message = 'Welcome to Socket.IO Chat – ';
-    log(message, {
-      prepend: true,
-    });
-    addParticipantsMessage(data);
-  });
+  socket.onopen = (evt) => {
+    console.log('websocket connected');
+  };
 
-  // Whenever the server emits 'new message', update the chat body
-  socket.on('new message', (data) => {
-    addChatMessage(data);
-  });
+  socket.onerror = (evt) => {
+    log('connection error');
+  };
 
-  // Whenever the server emits 'user joined', log it in the chat body
-  socket.on('user joined', (data) => {
-    log(data.username + ' joined');
-    addParticipantsMessage(data);
-  });
-
-  // Whenever the server emits 'user left', log it in the chat body
-  socket.on('user left', (data) => {
-    log(data.username + ' left');
-    addParticipantsMessage(data);
-    removeChatTyping(data);
-  });
-
-  // Whenever the server emits 'typing', show the typing message
-  socket.on('typing', (data) => {
-    addChatTyping(data);
-  });
-
-  // Whenever the server emits 'stop typing', kill the typing message
-  socket.on('stop typing', (data) => {
-    removeChatTyping(data);
-  });
-
-  socket.on('disconnect', () => {
+  socket.onclose = (evt) => {
     log('you have been disconnected');
-  });
+  };
 
-  socket.on('reconnect', () => {
-    log('you have been reconnected');
-    if (username) {
-      socket.emit('add user', username);
+  socket.onmessage = (evt) => {
+    const data = JSON.parse(evt.data);
+    console.dir(data);
+    // console.dir(data.eventType);
+    const { eventType, username, message, typing } = data;
+    if (!eventType) {
+      return;
     }
-  });
+    switch (eventType) {
+      case 'add user':
+        connected = true;
+        // Display the welcome message
+        const welcomeMsg = 'Welcome to Socket.IO Chat – ';
+        log(welcomeMsg, {
+          prepend: true,
+        });
+        addParticipantsMessage(1);
+        if (username != selfUsername) {
+          log(username + ' joined');
+          addParticipantsMessage(1);
+        }
+        break;
+      case 'new message':
+        addChatMessage({ username: selfUsername, message });
+        break;
+      case 'user left':
+        break;
+      case 'typing':
+        addChatTyping({ username: selfUsername });
+        break;
+      case 'stop typing':
+        removeChatTyping({ username: selfUsername });
+        break;
+      case 'disconnect':
+        break;
 
-  socket.on('reconnect_error', () => {
-    log('attempt to reconnect has failed');
-  });
+      default:
+        break;
+    }
+  };
 });
