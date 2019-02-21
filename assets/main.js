@@ -1,7 +1,7 @@
 $(function() {
-  var FADE_TIME = 150; // ms
-  var TYPING_TIMER_LENGTH = 400; // ms
-  var COLORS = [
+  const FADE_TIME = 150; // ms
+  const TYPING_TIMER_LENGTH = 400; // ms
+  const COLORS = [
     '#e21400',
     '#91580f',
     '#f8a700',
@@ -17,25 +17,25 @@ $(function() {
   ];
 
   // Initialize variables
-  var $window = $(window);
-  var $usernameInput = $('.usernameInput'); // Input for username
-  var $messages = $('.messages'); // Messages area
-  var $inputMessage = $('.inputMessage'); // Input message input box
+  const $window = $(window);
+  const $usernameInput = $('.usernameInput'); // Input for username
+  const $messages = $('.messages'); // Messages area
+  const $inputMessage = $('.inputMessage'); // Input message input box
 
-  var $loginPage = $('.login.page'); // The login page
-  var $chatPage = $('.chat.page'); // The chatroom page
+  const $loginPage = $('.login.page'); // The login page
+  const $chatPage = $('.chat.page'); // The chatroom page
 
   // Prompt for setting a username
-  var username;
-  var connected = false;
-  var typing = false;
-  var lastTypingTime;
-  var $currentInput = $usernameInput.focus();
+  let username;
+  const connected = false;
+  const typing = false;
+  const lastTypingTime;
+  const $currentInput = $usernameInput.focus();
 
-  var socket = io();
+  const socket = new WebSocket('ws://' + document.location.host + '/ws');
 
   const addParticipantsMessage = (data) => {
-    var message = '';
+    const message = '';
     if (data.numUsers === 1) {
       message += "there's 1 participant";
     } else {
@@ -62,7 +62,7 @@ $(function() {
 
   // Sends a chat message
   const sendMessage = () => {
-    var message = $inputMessage.val();
+    const message = $inputMessage.val();
     // Prevent markup from being injected into the message
     message = cleanInput(message);
     // if there is a non-empty message and a socket connection
@@ -79,7 +79,7 @@ $(function() {
 
   // Log a message
   const log = (message, options) => {
-    var $el = $('<li>')
+    const $el = $('<li>')
       .addClass('log')
       .text(message);
     addMessageElement($el, options);
@@ -88,20 +88,20 @@ $(function() {
   // Adds the visual chat message to the message list
   const addChatMessage = (data, options) => {
     // Don't fade the message in if there is an 'X was typing'
-    var $typingMessages = getTypingMessages(data);
+    const $typingMessages = getTypingMessages(data);
     options = options || {};
     if ($typingMessages.length !== 0) {
       options.fade = false;
       $typingMessages.remove();
     }
 
-    var $usernameDiv = $('<span class="username"/>')
+    const $usernameDiv = $('<span class="username"/>')
       .text(data.username)
       .css('color', getUsernameColor(data.username));
-    var $messageBodyDiv = $('<span class="messageBody">').text(data.message);
+    const $messageBodyDiv = $('<span class="messageBody">').text(data.message);
 
-    var typingClass = data.typing ? 'typing' : '';
-    var $messageDiv = $('<li class="message"/>')
+    const typingClass = data.typing ? 'typing' : '';
+    const $messageDiv = $('<li class="message"/>')
       .data('username', data.username)
       .addClass(typingClass)
       .append($usernameDiv, $messageBodyDiv);
@@ -129,7 +129,7 @@ $(function() {
   // options.prepend - If the element should prepend
   //   all other messages (default = false)
   const addMessageElement = (el, options) => {
-    var $el = $(el);
+    const $el = $(el);
 
     // Setup default options
     if (!options) {
@@ -171,8 +171,8 @@ $(function() {
       lastTypingTime = new Date().getTime();
 
       setTimeout(() => {
-        var typingTimer = new Date().getTime();
-        var timeDiff = typingTimer - lastTypingTime;
+        const typingTimer = new Date().getTime();
+        const timeDiff = typingTimer - lastTypingTime;
         if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
           socket.emit('stop typing');
           typing = false;
@@ -191,12 +191,12 @@ $(function() {
   // Gets the color of a username through our hash function
   const getUsernameColor = (username) => {
     // Compute hash code
-    var hash = 7;
-    for (var i = 0; i < username.length; i++) {
+    const hash = 7;
+    for (const i = 0; i < username.length; i++) {
       hash = username.charCodeAt(i) + (hash << 5) - hash;
     }
     // Calculate color
-    var index = Math.abs(hash % COLORS.length);
+    const index = Math.abs(hash % COLORS.length);
     return COLORS[index];
   };
 
@@ -241,7 +241,7 @@ $(function() {
   socket.on('login', (data) => {
     connected = true;
     // Display the welcome message
-    var message = 'Welcome to Socket.IO Chat – ';
+    const message = 'Welcome to Socket.IO Chat – ';
     log(message, {
       prepend: true,
     });
