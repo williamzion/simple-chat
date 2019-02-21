@@ -1,12 +1,15 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"path/filepath"
 	"sync"
 	"text/template"
 )
+
+var addr = flag.String("addr", ":8080", "http service address")
 
 // templ represents a single template.
 type templHandler struct {
@@ -23,8 +26,17 @@ func (t *templHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	flag.Parse()
+
+	hub := newHub()
+	go hub.run()
+
 	http.Handle("/", &templHandler{filename: "index.html"})
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(hub, w, r)
+	})
+	
+	if err := http.ListenAndServe(*addr, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
