@@ -260,8 +260,7 @@ $(function() {
   socket.onmessage = (evt) => {
     const data = JSON.parse(evt.data);
     console.dir(data);
-    // console.dir(data.eventType);
-    const { eventType, username, message, typing } = data;
+    const { eventType, username, message } = data;
     if (!eventType) {
       return;
     }
