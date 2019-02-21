@@ -37,6 +37,7 @@ func (h *Hub) run() {
 				select {
 				case client.send <- message:
 				default:
+					// If the client's send buffer is full, then the hub assumes that the client is dead or stuck. In this case, the hub unregisters the client and closes the websocket.
 					close(client.send)
 					delete(h.clients, client)
 				}
