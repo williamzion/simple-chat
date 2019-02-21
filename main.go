@@ -34,7 +34,8 @@ func main() {
 	fs := http.FileServer(http.Dir("assets"))
 
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.Handle("/", &templHandler{filename: "index.html"})
+	http.Handle("/", MustAuth(&templHandler{filename: "index.html"}))
+	http.Handle("/login", &templHandler{filename: "login.html"})
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
