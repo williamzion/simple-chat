@@ -281,15 +281,13 @@ $(function() {
       case 'new message':
         addChatMessage({ username: selfUsername, message });
         break;
-      case 'user left':
-        break;
+      // case 'user left':
+      //   break;
       case 'typing':
         addChatTyping({ username: selfUsername });
         break;
       case 'stop typing':
         removeChatTyping({ username: selfUsername });
-        break;
-      case 'disconnect':
         break;
 
       default:
