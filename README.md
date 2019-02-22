@@ -31,3 +31,7 @@ $ `cd go list -f '{{.Dir}}' github.com/williamzion/pretty-chat`
 $ `go run *.go`
 
 To use the chat application, open http://localhost:8080/ in your browser.
+
+## Author
+
+- [William](https://github.com/williamzion)
