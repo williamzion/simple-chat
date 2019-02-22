@@ -24,9 +24,9 @@ The application requires a working Go development environment.
 
 Note: please substitute github oauth2 credentials with your own before running this app to take effect.
 
-$ `go get github.com/williamzion/pretty-chat`
+$ `go get github.com/williamzion/simple-chat`
 
-$ `cd go list -f '{{.Dir}}' github.com/williamzion/pretty-chat`
+$ `cd go list -f '{{.Dir}}' github.com/williamzion/simple-chat`
 
 $ `go run *.go`
 
