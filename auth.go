@@ -92,7 +92,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		cookie := http.Cookie{
 			Name:     "auth",
 			Value:    base64.StdEncoding.EncodeToString([]byte(*user.Login)),
-			Path:     "/",
+			Path:     "/", // if not set, will be default to /auth/callback/
 			HttpOnly: true,
 		}
 		http.SetCookie(w, &cookie)
