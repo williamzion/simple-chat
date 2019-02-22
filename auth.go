@@ -18,6 +18,7 @@ type authHandler struct {
 func (a *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, err := r.Cookie("auth")
 	if err == http.ErrNoCookie {
+		fmt.Println("No cookie found")
 		// w.Header().Set("Location", "/login")
 		// w.WriteHeader(http.StatusTemporaryRedirect)
 		// Or use below code instead.
@@ -89,8 +90,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Printf("Logged in as GitHub user: %s\n", *user.Login)
 		cookie := http.Cookie{
-			Name:  "auth",
-			Value: base64.StdEncoding.EncodeToString([]byte(*user.Login)),
+			Name:     "auth",
+			Value:    base64.StdEncoding.EncodeToString([]byte(*user.Login)),
+			Path:     "/",
+			HttpOnly: true,
 		}
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
