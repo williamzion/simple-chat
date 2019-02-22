@@ -12,6 +12,12 @@ Dependencies used in this application are:
 - [oauth2](https://golang.org/x/oauth2)
 - [go-github](https://github.com/google/go-github/github)
 
+## Features
+
+- Multiple chatting rooms among users.
+
+- Login with oauth2 via Github
+
 ## Running the application
 
 The application requires a working Go development environment.
