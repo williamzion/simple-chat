@@ -22,7 +22,7 @@ Dependencies used in this application are:
 
 The application requires a working Go development environment.
 
-Note: please substitute github oauth2 credentials with our own before running this app to make effect.
+Note: please substitute github oauth2 credentials with your own before running this app to make effect.
 
 $ `go get github.com/williamzion/pretty-chat`
 
