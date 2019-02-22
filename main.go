@@ -30,7 +30,7 @@ func (t *templHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		data["UserData"] = string(value)
+		data["Username"] = string(value)
 	}
 	t.templ.Execute(w, data)
 }

@@ -13,7 +13,7 @@
   <body>
     <ul id="messages"></ul>
     <form id="chatbox">
-      {{.UserData}}:<br />
+      {{.Username}}:<br />
       <textarea></textarea>
       <input type="submit" value="Send" />
     </form>
@@ -35,7 +35,7 @@
             return false;
           }
           socket.send(
-            JSON.stringify({ Name: '{{.UserData}}', Message: msgBox.val() })
+            JSON.stringify({ Message: msgBox.val() })
           );
           msgBox.val('');
           return false;

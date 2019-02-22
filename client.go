@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"log"
 	"net/http"
 	"time"
@@ -39,6 +40,8 @@ type Client struct {
 	conn *websocket.Conn
 	// Buffered channel of outbound messages.
 	send chan *message
+
+	username string
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -66,6 +69,8 @@ func (c *Client) readPump() {
 			}
 			break
 		}
+		msg.When = time.Now()
+		msg.Name = c.username
 		c.hub.broadcast <- msg
 	}
 }
@@ -119,7 +124,17 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan *message, 256)}
+	authCookie, err := r.Cookie("auth")
+	if err != nil {
+		log.Println("err:", err)
+		return
+	}
+	value, err := base64.StdEncoding.DecodeString(authCookie.Value)
+	if err != nil {
+		log.Println("err:", err)
+		return
+	}
+	client := &Client{hub: hub, conn: conn, send: make(chan *message, 256), username: string(value)}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
