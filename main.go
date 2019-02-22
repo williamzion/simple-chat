@@ -41,9 +41,6 @@ func main() {
 	hub := newHub()
 	go hub.run()
 
-	fs := http.FileServer(http.Dir("assets"))
-
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.Handle("/", MustAuth(&templHandler{filename: "index.html"}))
 	http.Handle("/login", &templHandler{filename: "login.html"})
 	http.HandleFunc("/auth/", loginHandler)
