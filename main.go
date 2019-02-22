@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"flag"
 	"log"
 	"net/http"
@@ -22,7 +23,16 @@ func (t *templHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templ", t.filename)))
 	})
-	t.templ.Execute(w, nil)
+	data := make(map[string]string)
+	if authCookie, err := r.Cookie("auth"); err == nil {
+		value, err := base64.StdEncoding.DecodeString(authCookie.Value)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		data["UserData"] = string(value)
+	}
+	t.templ.Execute(w, data)
 }
 
 func main() {
