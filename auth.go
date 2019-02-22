@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
@@ -87,6 +88,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Printf("Logged in as GitHub user: %s\n", *user.Login)
+		cookie := http.Cookie{
+			Name:  "auth",
+			Value: base64.StdEncoding.EncodeToString([]byte(*user.Login)),
+		}
+		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	default:
 		// w.WriteHeader(http.StatusNotFound)
