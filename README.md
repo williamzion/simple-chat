@@ -1,4 +1,4 @@
-# Pretty-Chat
+# Simple-Chat
 
 Simple-chat is written in Golang under instruction of [Go Programming Blueprints](https://www.goodreads.com/book/show/32902495-go-programming-blueprints---second-edition).
 
