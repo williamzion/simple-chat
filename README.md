@@ -1,10 +1,10 @@
 # Pretty-Chat
 
-Pretty-chat is written in Golang under instruction of [Go Programming Blueprints](https://www.goodreads.com/book/show/32902495-go-programming-blueprints---second-edition).
+Simple-chat is written in Golang under instruction of [Go Programming Blueprints](https://www.goodreads.com/book/show/32902495-go-programming-blueprints---second-edition).
 
 ## Introduction
 
-Pretty-chat is a websocket and github oauth2 implemented simple chatting web application.
+Simple-chat is a websocket and github oauth2 implemented simple chatting web application.
 
 Dependencies used in this application are:
 
